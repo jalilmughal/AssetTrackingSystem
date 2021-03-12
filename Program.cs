@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AssetTrackingSystem
 {
@@ -20,12 +21,13 @@ namespace AssetTrackingSystem
             string _ModelName = assets.ModelName;
             int _Price = assets.Price;
 
-            Console.WriteLine("Type your product details bellow, exit by typing 'exit'!");
+            Console.WriteLine("Type your product details bellow, exit by typing 'exit'.");
 
             do
             {
                 //Input Category of the asset
-                Console.Write("Category: 'Laptop' or 'Mobiles' ");
+                Console.WriteLine("Type 'L' for Laptop Computers and 'M' for Mobile Phones!");    
+                Console.Write("Category: ");
                 _Category = Console.ReadLine();
                 if (_Category.ToLower().Trim() == "exit")
                 {
@@ -34,6 +36,7 @@ namespace AssetTrackingSystem
                 }
 
                 //Input PurchaseDate of the asset
+                Console.WriteLine("Please enter date in format DD/MM/YYYY!");
                 Console.Write("Purchase Date: ");
                 _PurchaseDate = Console.ReadLine();
 
@@ -53,6 +56,7 @@ namespace AssetTrackingSystem
                 }
 
                 //Input price of the asset
+                Console.WriteLine("Type Price as 123 and not decimal!");
                 Console.Write("Price: ");
                 _Price = Convert.ToInt32(Console.ReadLine());
                 if ((_Price).ToString().ToLower().Trim() == "exit")
@@ -62,7 +66,7 @@ namespace AssetTrackingSystem
                 }
 
                 //if-loop, if the _Category=laptop then add the asset in computerAssets-List else add in mobileAssets-List.
-                if (_Category.ToLower().Trim() == "laptop")
+                if ((_Category.ToLower().Trim() == "laptop") && (_Category.ToLower().Trim() == "l") && (!String.IsNullOrWhiteSpace(_Category)) )
                 {
                     computerAssets.Add(new Computers(_Category, _PurchaseDate, _ModelName, Convert.ToInt32(_Price)));
                 }
@@ -72,71 +76,31 @@ namespace AssetTrackingSystem
                 }
             } while (true);
 
-            Console.WriteLine("Category".PadRight(15) + "PurchaseDate".PadRight(15) + "ModelName".PadRight(15) + "Price".ToString().PadRight(15));
-            for (int i = 0; i < computerAssets.Count; i++)
+            Console.WriteLine("Category".PadRight(15) + "PurchaseDate".PadRight(15) + "ModelName".PadRight(15) + "Price".ToString().PadRight(15));            
+            
+            /*for (int asset = 0; asset < computerAssets.Count; asset++)
             {
-                Console.WriteLine(computerAssets[i].Category.PadRight(15) + computerAssets[i].PurchaseDate.PadRight(15) + computerAssets[i].ModelName.PadRight(15) + (computerAssets[i].Price).ToString().PadRight(15));
+                Console.WriteLine(computerAssets[asset].Category.PadRight(15) + computerAssets[asset].PurchaseDate.PadRight(15) + computerAssets[asset].ModelName.PadRight(15) + (computerAssets[asset].Price).ToString().PadRight(15));
             }
 
             foreach (var item in mobileAssets)
             {
                 Console.WriteLine(item.Category.PadRight(15) + item.PurchaseDate.PadRight(15) + item.ModelName.PadRight(15) + item.Price.ToString().PadRight(15));
+            } */ 
+            //OrderBy computerAssets first and then mobileAssets
+            //computerAssets.OrderBy(computerAssets=> computerAssets.Category).ThenBy(mobileAssets => mobileAssets.Category);
+
+
+            //Merge computerAssets-List & mobileAssets-List to new List, assetsList
+            var assetsList = computerAssets.Concat(mobileAssets).ToList();
+            assetsList.OrderBy(assetsList => assetsList.Category=="laptop").OrderByDescending(assetsList => assetsList.PurchaseDate);
+
+            foreach (Assets assetItem in assetsList)
+            {
+                Console.WriteLine(assetItem.Category.PadRight(15) + assetItem.PurchaseDate.PadRight(15) + assetItem.ModelName.PadRight(15) + assetItem.Price.ToString().PadRight(15));
             }
 
             Console.ReadKey();
-        }
-    }
-
-    public class Mobiles : Assets
-    {
-        public Mobiles()
-        {
-
-        }
-        public Mobiles(string category, string purchaseDate, string modelName, int price)
-        {
-            Category = category;
-            PurchaseDate = purchaseDate;
-            ModelName = modelName;
-            Price = price;
-        }
-    }
-    public class Computers : Assets
-    {
-        public Computers()
-        {
-
-        }
-        public Computers(string category, string purchaseDate, string modelName, int price)
-        {
-            Category = category;
-            PurchaseDate = purchaseDate;
-            ModelName = modelName;
-            Price = price;
-        }
-    }
-
-    public class Assets
-    {
-        public string Category { get; set; }
-        public string PurchaseDate { get; set; }
-        public string ModelName { get; set; }
-        public int Price { get; set; }
-    }
-
-    public static class WriterExtensions
-    {
-        public static void WriteMessageInRed(string input)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(input);
-            Console.ResetColor();
-        }
-        public static void WriteMessageYellow(string input)
-        {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine(input);
-            Console.ResetColor();
         }
     }
 }
