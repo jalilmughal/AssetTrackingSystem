@@ -18,6 +18,9 @@ namespace AssetTrackingSystem
             string _ModelName = assets.ModelName;
             int _Price = assets.Price;
 
+            int price = 0;
+
+
             Console.WriteLine("Type your product details bellow, exit by typing 'exit'.");
 
             do
@@ -33,10 +36,15 @@ namespace AssetTrackingSystem
                 }
 
                 //Input PurchaseDate of the asset
-                Console.WriteLine("Please enter date in format DD/MM/YYYY!");
                 Console.Write("Purchase Date: ");
                 _PurchaseDate = Convert.ToDateTime(Console.ReadLine());
- 
+                _PurchaseDate.GetDateTimeFormats(new System.Globalization.CultureInfo("en-US", true));
+
+                if ((_PurchaseDate.Year < 1900 && _PurchaseDate.Year > DateTime.Today.Year) && (_PurchaseDate.Month < 0 && _PurchaseDate.Month > 12 && _PurchaseDate.Day < 1 && _PurchaseDate.Day > 31))
+                {
+                    WriterExtensions.WriteMessageInRed("Ivalid input, Please enter date in format DD/MM/YYYY.");
+                }
+
                 //Input ModelName of the asset
                 Console.Write("Model Name: ");
                 _ModelName = Console.ReadLine();
@@ -47,7 +55,6 @@ namespace AssetTrackingSystem
                 }
 
                 //Input price of the asset
-                Console.WriteLine("Type Price as 123 and not decimal!");
                 Console.Write("Price: ");
                 _Price = Convert.ToInt32(Console.ReadLine());
                 if ((_Price).ToString().ToLower().Trim() == "exit")
@@ -55,8 +62,17 @@ namespace AssetTrackingSystem
                     WriterExtensions.WriteMessageInRed("App'en stänges nu!");
                     break;
                 }
+                else
+                {
+                    if (int.TryParse(_Price.ToString(), out price) == false)
+                    {
+                        WriterExtensions.WriteMessageInRed("Invalid Input, Please enter a price, no decimals allowed.");
+                        continue;
+                    }
+                    break;
+                }
 
-                //if-loop, if the _Category=laptop then add the asset in computerAssets-List else add in mobileAssets-List.
+                //if-loop, if the _Category=laptop then add asset in computerAssets-List else add in mobileAssets-List.
                 if ((_Category.ToLower().Trim() == "laptop") && (!String.IsNullOrWhiteSpace(_Category)))
                 {
                     computerAssets.Add(new Computers(_Category, _PurchaseDate, _ModelName, Convert.ToInt32(_Price)));
@@ -71,10 +87,11 @@ namespace AssetTrackingSystem
 
             //Merge computerAssets-List & mobileAssets-List to new List, assetsList
             var assetsList = computerAssets.Concat(mobileAssets).ToList();
-            foreach (Assets assetItem in assetsList)
-            {
-                assetsList.OrderBy(assetsList => assetsList.Category == "laptop").OrderByDescending(assetsList => assetsList.PurchaseDate).ThenBy(assetsList => assetsList.Category == "mobile").OrderByDescending(assetsList=>assetsList.PurchaseDate);
+            var sortedAssetsList = assetsList.OrderBy(assetsList => assetsList.Category == "laptop").OrderByDescending(assetsList => assetsList.PurchaseDate).ThenBy(assetsList => assetsList.Category == "mobile").OrderByDescending(assetsList => assetsList.PurchaseDate);
 
+            //If purchaseDate older then 33 months from today's DateTime, WriteLine in RED else WriteLine normal.
+            foreach (Assets assetItem in sortedAssetsList)
+            {
                 if ((DateTime.Now > assetItem.PurchaseDate.AddMonths(33)))
                 {
                     WriterExtensions.WriteMessageInRed(assetItem.Category.PadRight(15) + Convert.ToDateTime(assetItem.PurchaseDate).ToShortDateString().PadRight(15) + assetItem.ModelName.PadRight(15) + assetItem.Price.ToString().PadRight(15));
@@ -88,10 +105,4 @@ namespace AssetTrackingSystem
             Console.ReadKey();
         }
     }
-
-
-
-
-
-
 }
